@@ -13,6 +13,9 @@ router.post('/', async (req, res) => {
     if (!req.body.state) {
         req.body.state = 'USA'
     }
+    if(req.currentUser?.role !== 'admin'){
+        return res.status(403).json({ message: 'You are not allowed to add a place'})
+    }
     const place = await Place.create(req.body)
     res.json(place)
 })
@@ -54,7 +57,12 @@ router.put('/:placeId', async (req, res) => {
         })
         if (!place) {
             res.status(404).json({ message: `Could not find place with id "${placeId}"` })
-        } else {
+        }
+        if(req.currentUser?.role !== 'admin'){
+            return res.status(403).json({ message: 'You are not allowed to edit places'})
+        }
+          
+         else {
             Object.assign(place, req.body)
             await place.save()
             res.json(place)
@@ -119,7 +127,11 @@ router.delete('/:placeId/comments/:commentId', async (req, res) => {
 
     if (isNaN(placeId)) {
         res.status(404).json({ message: `Invalid id "${placeId}"` })
-    } else if (isNaN(commentId)) {
+    }
+    if(req.currentUser?.role !== 'admin'){
+        return res.status(403).json({ message: 'You are not allowed to delete places'})
+    }
+     else if (isNaN(commentId)) {
         res.status(404).json({ message: `Invalid id "${commentId}"` })
     } else {
         const comment = await Comment.findOne({
@@ -136,3 +148,8 @@ router.delete('/:placeId/comments/:commentId', async (req, res) => {
 
 
 module.exports = router
+
+
+
+
+  
